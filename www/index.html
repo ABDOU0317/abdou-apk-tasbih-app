@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>المسبحة الإلكترونية الاحترافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --primary: #d4af37; /* Gold */
+            --text: #ffffff;
+            --secondary: #2e7d32; /* Islamic Green */
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .tasbih-container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .zikr-display {
+            font-family: 'Amiri', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .counter-circle {
+            width: 250px;
+            height: 250px;
+            border: 8px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 40px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.3s;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .counter-circle:active { transform: scale(0.95); border-color: var(--secondary); }
+
+        .count-num { font-size: 5rem; font-weight: 700; margin: 0; line-height: 1; }
+        .count-label { font-size: 1rem; color: #888; margin-top: 5px; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1px solid #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:active { background: #333; }
+        .btn-reset { color: var(--error); }
+        .btn-change { color: var(--primary); }
+
+        .settings {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            color: #555;
+            cursor: pointer;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .vibrate { animation: pulse 0.1s ease-in-out; }
+
+    </style>
+</head>
+<body>
+
+    <div class="tasbih-container">
+        <div class="zikr-display" id="zikr-text">سبحان الله</div>
+        
+        <div class="counter-circle" id="counter-btn">
+            <div class="count-num" id="count-display">0</div>
+            <div class="count-label">تسبيحة</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-change" id="next-zikr">
+                <i class="fas fa-sync-alt"></i> الذكر التالي
+            </button>
+            <button class="btn" id="reset-btn">
+                <i class="fas fa-redo"></i> تصفير
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const azkar = ["سبحان الله", "الحمد لله", "لا إله إلا الله", "الله أكبر", "أستغفر الله", "اللهم صلِ على محمد"];
+        let currentZikrIndex = 0;
+        let count = 0;
+
+        const countDisplay = document.getElementById('count-display');
+        const zikrText = document.getElementById('zikr-text');
+        const counterBtn = document.getElementById('counter-btn');
+        const nextZikrBtn = document.getElementById('next-zikr');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function updateDisplay() {
+            countDisplay.innerText = count;
+            zikrText.innerText = azkar[currentZikrIndex];
+            localStorage.setItem('tasbih_count', count);
+            localStorage.setItem('tasbih_index', currentZikrIndex);
+        }
+
+        counterBtn.addEventListener('click', () => {
+            count++;
+            // Vibration effect (haptic feedback)
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+            updateDisplay();
+        });
+
+        nextZikrBtn.addEventListener('click', () => {
+            currentZikrIndex = (currentZikrIndex + 1) % azkar.length;
+            count = 0;
+            updateDisplay();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if(confirm("هل تريد تصفير العداد؟")) {
+                count = 0;
+                updateDisplay();
+            }
+        });
+
+        // Load saved state
+        const savedCount = localStorage.getItem('tasbih_count');
+        const savedIndex = localStorage.getItem('tasbih_index');
+        if (savedCount) count = parseInt(savedCount);
+        if (savedIndex) currentZikrIndex = parseInt(savedIndex);
+
+        updateDisplay();
+    </script>
+</body>
+</html>
